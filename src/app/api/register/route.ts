@@ -1,9 +1,7 @@
 // Next Imports
 import { NextResponse } from 'next/server'
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/libs/prisma'
 
 export async function POST(req: Request) {
   try {
@@ -23,7 +21,7 @@ export async function POST(req: Request) {
 
     // Create new user
     // NOTE: In production, hash the password with bcrypt
-    const user = await prisma.user.create({
+    const user = await (prisma.user as any).create({
       data: {
         name,
         email,
@@ -38,7 +36,7 @@ export async function POST(req: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: (user as any).role
       },
       { status: 201 }
     )
@@ -46,7 +44,7 @@ export async function POST(req: Request) {
     console.error('Registration error:', error)
 
     return NextResponse.json(
-      { message: 'Server error during registration' },
+      { message: 'Server error during registration', error: error.message },
       { status: 500 }
     )
   }
