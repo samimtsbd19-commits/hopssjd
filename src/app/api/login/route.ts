@@ -13,9 +13,9 @@ export async function POST(req: Request) {
       where: { email }
     })
 
-    if (user && user.password === password) {
+    if (user && (user as any).password === password) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password: _, ...filteredUserData } = user
+      const { password: _, ...filteredUserData } = user as any
 
       return NextResponse.json(filteredUserData)
     } else {

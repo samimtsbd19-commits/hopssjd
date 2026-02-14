@@ -1,12 +1,9 @@
-// Third-party Imports
 import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { PrismaClient } from '@prisma/client'
 import type { NextAuthOptions } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
-
-const prisma = new PrismaClient()
+import prisma from '@/libs/prisma'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
@@ -42,15 +39,17 @@ export const authOptions: NextAuthOptions = {
           }
 
           // NOTE: In production, use bcrypt.compare()
-          if (user.password !== password) {
+          if (user && (user as any).password === password) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { password: _, ...filteredUserData } = user as any
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: (user as any).role
+            }
+          } else {
             throw new Error('Invalid password')
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role
           }
         } catch (e: any) {
           throw new Error(e.message)
